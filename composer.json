@@ -1,0 +1,18 @@
+{
+    "name": "phpnuts/basics",
+    "type": "library",
+    "description": "Basics library for PhpNuts",
+    "keywords": ["phpnuts"],
+    "license": "MIT",
+    "require": {
+        "php": ">=7.3",
+        "webmozart/assert": "^1.2",
+        "ext-json": "*",
+        "ext-dom": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "PhpNuts\\": "src/PhpNuts/"
+        }
+    }
+}
