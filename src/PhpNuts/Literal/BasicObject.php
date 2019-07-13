@@ -8,9 +8,18 @@ use JsonSerializable;
 use RuntimeException;
 use stdClass;
 
+/**
+ * BasicObject
+ *
+ * Basic Object is designed as a properties wrapper allowing loose typed elements
+ * within its internal array. It is NOT the responsibility of the Basic Object to
+ * force type. This should be the responsibility of extending classes.
+ *
+ * @package PhpNuts\Literal
+ */
 class BasicObject implements Iterator, JsonSerializable
 {
-    /** @var array  */
+    /** @var mixed[] An array containing mixed type values.  */
     protected $properties = [];
 
     /**
@@ -23,7 +32,12 @@ class BasicObject implements Iterator, JsonSerializable
     }
 
     /**
-     * We are converting getFirstName -> firstName
+     * A magic method intercepts unknown method calls and mapping them to internal properties.
+     * For example, we are converting getFirstName() to 'firstName' associative key.
+     *
+     * This object assumes that all internal property names start with a lowercase first character
+     * as part of this particular object's design pattern.
+     *
      * @param string $name
      * @param array $arguments
      * @return mixed
@@ -78,6 +92,17 @@ class BasicObject implements Iterator, JsonSerializable
     }
 
     /**
+     * Return the current element
+     * @link https://php.net/manual/en/iterator.current.php
+     * @return mixed Can return any type.
+     * @since 5.0.0
+     */
+    public function current()
+    {
+        return current($this->properties);
+    }
+
+    /**
      * @param array|stdClass|BasicObject $properties
      * @return $this
      */
@@ -123,6 +148,29 @@ class BasicObject implements Iterator, JsonSerializable
     }
 
     /**
+     * Specify data which should be serialized to JSON
+     * @link https://php.net/manual/en/jsonserializable.jsonserialize.php
+     * @return mixed data which can be serialized by <b>json_encode</b>,
+     * which is a value of any type other than a resource.
+     * @since 5.4.0
+     */
+    public function jsonSerialize()
+    {
+        return $this->properties;
+    }
+
+    /**
+     * Return the key of the current element
+     * @link https://php.net/manual/en/iterator.key.php
+     * @return mixed scalar on success, or null on failure.
+     * @since 5.0.0
+     */
+    public function key()
+    {
+        return key($this->properties);
+    }
+
+    /**
      * @return array
      */
     public function keys(): array
@@ -146,6 +194,17 @@ class BasicObject implements Iterator, JsonSerializable
     {
         $this->properties = array_merge($this->properties, $this->resolveProperties($properties));
         return $this;
+    }
+
+    /**
+     * Move forward to next element
+     * @link https://php.net/manual/en/iterator.next.php
+     * @return void Any returned value is ignored.
+     * @since 5.0.0
+     */
+    public function next()
+    {
+        next($this->properties);
     }
 
     /**
@@ -183,6 +242,17 @@ class BasicObject implements Iterator, JsonSerializable
     }
 
     /**
+     * Rewind the Iterator to the first element
+     * @link https://php.net/manual/en/iterator.rewind.php
+     * @return void Any returned value is ignored.
+     * @since 5.0.0
+     */
+    public function rewind()
+    {
+        reset($this->properties);
+    }
+
+    /**
      * @param string|int $name
      * @param mixed $value
      * @return BasicObject
@@ -204,6 +274,14 @@ class BasicObject implements Iterator, JsonSerializable
     }
 
     /**
+     * @return string
+     */
+    public function toJson(): string
+    {
+        return json_encode($this->properties, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+    }
+
+    /**
      * @param string|null $name
      * @return $this
      */
@@ -216,39 +294,6 @@ class BasicObject implements Iterator, JsonSerializable
     }
 
     /**
-     * Return the current element
-     * @link https://php.net/manual/en/iterator.current.php
-     * @return mixed Can return any type.
-     * @since 5.0.0
-     */
-    public function current()
-    {
-        return current($this->properties);
-    }
-
-    /**
-     * Move forward to next element
-     * @link https://php.net/manual/en/iterator.next.php
-     * @return void Any returned value is ignored.
-     * @since 5.0.0
-     */
-    public function next()
-    {
-        next($this->properties);
-    }
-
-    /**
-     * Return the key of the current element
-     * @link https://php.net/manual/en/iterator.key.php
-     * @return mixed scalar on success, or null on failure.
-     * @since 5.0.0
-     */
-    public function key()
-    {
-        return key($this->properties);
-    }
-
-    /**
      * Checks if current position is valid
      * @link https://php.net/manual/en/iterator.valid.php
      * @return boolean The return value will be casted to boolean and then evaluated.
@@ -258,36 +303,5 @@ class BasicObject implements Iterator, JsonSerializable
     public function valid()
     {
         return ($this->key() !== null);
-    }
-
-    /**
-     * Rewind the Iterator to the first element
-     * @link https://php.net/manual/en/iterator.rewind.php
-     * @return void Any returned value is ignored.
-     * @since 5.0.0
-     */
-    public function rewind()
-    {
-        reset($this->properties);
-    }
-
-    /**
-     * Specify data which should be serialized to JSON
-     * @link https://php.net/manual/en/jsonserializable.jsonserialize.php
-     * @return mixed data which can be serialized by <b>json_encode</b>,
-     * which is a value of any type other than a resource.
-     * @since 5.4.0
-     */
-    public function jsonSerialize()
-    {
-        return $this->properties;
-    }
-
-    /**
-     * @return string
-     */
-    public function toJson(): string
-    {
-        return json_encode($this->properties, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
     }
 }
