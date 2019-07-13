@@ -115,7 +115,7 @@ class BasicObjectTest extends TestCase
     /**
      * Test that the magic method __call() allows us to gain get and set access
      * to internal properties.
-     * 
+     *
      * IMPORTANT: it is ok that our setFirstName() and getFirstName() methods
      * show as "not found", because...they don't exist. But, in an extending
      * class you should always declare your magic methods in PHP DocBlocks.
