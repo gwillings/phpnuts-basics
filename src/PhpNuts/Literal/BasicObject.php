@@ -15,6 +15,25 @@ use stdClass;
  * within its internal array. It is NOT the responsibility of the Basic Object to
  * force type. This should be the responsibility of extending classes.
  *
+ * The BasicObject class is at the heart of a lot of data-based objects due to its
+ * mutability and flexibility.
+ *
+ * Properties within a BasicObject may be added, set or removed at any time.
+ * This flexibility means they are prone to mutation and non-strict types.
+ * You should be aware of this when designing classes based on this type of object.
+ *
+ * All properties of a BasicObject are stored within an internal associative array and
+ * accessing properties may be done through either:
+ * - the '->' format e.g. $myObj->myProperty
+ * - using a magic get or set method (our preferred method) e.g. $myObj->getMyProperty()
+ * - using the built-in get() or set() methods e.g. $myObj->get('myProperty')
+ *
+ * I recommend using the magic get and set methods because this allow us to ease our
+ * pain when refactoring code in the future.
+ *
+ * You can encourage auto-completion within the IDE by adding '@method' declarations
+ * to your phpDoc comment blocks.
+ *
  * @package PhpNuts\Literal
  */
 class BasicObject implements Iterator, JsonSerializable
