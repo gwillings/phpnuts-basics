@@ -216,6 +216,16 @@ class BasicObject implements Iterator, JsonSerializable
     }
 
     /**
+     * @return static
+     */
+    public function newEmptyClone()
+    {
+        $newInstance = clone $this;
+        $newInstance->resetProperties();
+        return $newInstance;
+    }
+
+    /**
      * Move forward to next element
      * @link https://php.net/manual/en/iterator.next.php
      * @return void Any returned value is ignored.
@@ -239,6 +249,16 @@ class BasicObject implements Iterator, JsonSerializable
         $keys = $this->keys();
         $keys[array_search($oldKey, $keys)] = $newKey;
         $this->properties = array_combine($keys, $this->properties);
+        return $this;
+    }
+
+    /**
+     * Resets the internal properties to an empty array.
+     * @return $this
+     */
+    public function resetProperties(): BasicObject
+    {
+        $this->properties = [];
         return $this;
     }
 
