@@ -8,8 +8,7 @@
         "php": ">=7.3",
         "webmozart/assert": "^1.2",
         "ext-json": "*",
-        "ext-dom": "*",
-        "ext-mysqli": "*"
+        "ext-dom": "*"
     },
     "autoload": {
         "psr-4": {

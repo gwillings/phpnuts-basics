@@ -294,7 +294,7 @@ class BasicObject implements Iterator, JsonSerializable
     /**
      * @param string|int $name
      * @param mixed $value
-     * @return BasicObject
+     * @return $this
      */
     public function set($name, $value): BasicObject
     {
