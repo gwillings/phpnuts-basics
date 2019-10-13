@@ -2,6 +2,7 @@
 
 namespace PhpNuts\Database;
 
+use PhpNuts\File\Exception\FileNotFoundException;
 use PhpNuts\Literal\BasicObject;
 
 /**
@@ -35,6 +36,20 @@ class Config extends BasicObject
             'type' => 'mysql'
         ]);
         $this->merge($properties);
+    }
+
+    /**
+     * @param string $path
+     * @return Config
+     * @throws FileNotFoundException
+     */
+    public static function loadFromIni(string $path): Config
+    {
+        if (!file_exists($path)) {
+            throw new FileNotFoundException($path);
+        }
+        $contents = parse_ini_file($path);
+        return new static($contents);
     }
 
     /**
