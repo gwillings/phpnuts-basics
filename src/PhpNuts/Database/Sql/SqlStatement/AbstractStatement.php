@@ -4,16 +4,33 @@ namespace PhpNuts\Database\Sql\SqlStatement;
 
 use InvalidArgumentException;
 use OutOfBoundsException;
+use PDOStatement;
+use PhpNuts\Database;
+use PhpNuts\Database\Exception\InstanceNotFoundException;
 use PhpNuts\Database\Sql\SqlBlock;
 use PhpNuts\Database\Sql\SqlFragment;
 
 /**
  * Class AbstractStatement
+ *
+ * Provides generic base SQL Code Block management/utilities for
+ * SQL Statement classes.
+ *
  * @package PhpNuts\Database\Sql\SqlStatement
  */
 abstract class AbstractStatement
 {
-    /** @var SqlBlock[] */
+    /**
+     * The database instance reference associated with the SQL statement.
+     * This is used to get the Database connection when handling PDO operations.
+     * @var string
+     */
+    private $databaseReference = Database::DEFAULT;
+
+    /**
+     * An array of SQL code blocks.
+     * @var SqlBlock[]
+     */
     private $sqlBlocks = [];
 
     /**
@@ -38,6 +55,17 @@ abstract class AbstractStatement
     }
 
     /**
+     * @return PDOStatement
+     */
+    protected function createStatement(): PDOStatement
+    {
+        return $this->getDatabase()->createStatement(
+            $this->getSql(),
+            $this->getParameters()
+        );
+    }
+
+    /**
      * @param string $name
      * @return SqlBlock
      */
@@ -55,6 +83,26 @@ abstract class AbstractStatement
      * @return string[]
      */
     abstract protected function getBlockSequence(): array;
+
+    /**
+     * Returns the Database instance to use when executing SQL for this statement.
+     * Note: if no Database instance has been explicitly set, the default will be returned.
+     * @return Database
+     * @throws InstanceNotFoundException
+     */
+    public function getDatabase(): Database
+    {
+        return Database::getInstance($this->databaseReference);
+    }
+
+    /**
+     * Returns the Database reference to obtain the Database instance.
+     * @return string
+     */
+    public function getDatabaseReference(): string
+    {
+        return $this->databaseReference;
+    }
 
     /**
      * @param int $index
@@ -147,6 +195,17 @@ abstract class AbstractStatement
     }
 
     /**
+     * Set the Database reference to use when getting the Database instance.
+     * @param string $reference
+     * @return $this
+     */
+    public function setDatabaseReference(string $reference): AbstractStatement
+    {
+        $this->databaseReference = $reference;
+        return $this;
+    }
+
+    /**
      * IMPORTANT: NEVER EVER...
      * This method is purely for debugging purposes and allows you to check whether
      * bound characters are set properly. It should NEVER be used directly with a
@@ -157,5 +216,13 @@ abstract class AbstractStatement
     {
         $fragment = new SqlFragment($this->getSql(), $this->getParameters());
         return $fragment->toDebugString();
+    }
+
+    /**
+     * @return string
+     */
+    public function toString()
+    {
+        return $this->getSql();
     }
 }

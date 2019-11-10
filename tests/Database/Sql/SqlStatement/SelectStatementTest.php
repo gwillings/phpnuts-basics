@@ -2,6 +2,8 @@
 
 namespace PhpNuts\Database\Sql\SqlStatement;
 
+use PhpNuts\Database;
+use PhpNuts\Database\Config;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -181,4 +183,5 @@ class SelectStatementTest extends TestCase
         $result = $this->reduceWhitespace($query->toDebugString());
         $this->assertEquals($expect, $result);
     }
+
 }

@@ -66,6 +66,17 @@ class DeleteStatement extends AbstractStatement
     }
 
     /**
+     * Executes the Delete Statement and returns the number of rows deleted.
+     * @return int
+     */
+    public function execute(): int
+    {
+        $statement = $this->createStatement();
+        $statement->execute();
+        return $statement->rowCount();
+    }
+
+    /**
      * Returns an array containing the names of the blocks in
      * order of priority/sequence.
      * @return string[]

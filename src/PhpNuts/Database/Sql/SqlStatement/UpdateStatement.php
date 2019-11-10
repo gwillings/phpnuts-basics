@@ -54,6 +54,17 @@ class UpdateStatement extends AbstractStatement
     }
 
     /**
+     * Executes the Update Statement and return the number of rows affected.
+     * @return int
+     */
+    public function execute(): int
+    {
+        $statement = $this->createStatement();
+        $statement->execute();
+        return $statement->rowCount();
+    }
+
+    /**
      * Returns an array containing the names of the blocks in
      * order of priority/sequence.
      * @return string[]

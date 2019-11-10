@@ -3,9 +3,11 @@
 namespace PhpNuts;
 
 use PDO;
+use PDOStatement;
 use PhpNuts\Database\Config;
 use PhpNuts\Database\Exception\DuplicateInstanceException;
 use PhpNuts\Database\Exception\InstanceNotFoundException;
+use PhpNuts\Database\Sql\SqlParam;
 
 /**
  * Class Database
@@ -15,7 +17,7 @@ use PhpNuts\Database\Exception\InstanceNotFoundException;
 class Database
 {
     /**
-     * Represents the default Database connection instance name.
+     * Represents the default Database connection instance name/reference.
      * @var string
      */
     const DEFAULT = '__default';
@@ -33,14 +35,20 @@ class Database
     private $connection;
 
     /**
+     * The default fetch mode for the database connection.
+     * @var int
+     */
+    private $fetchMode = PDO::FETCH_OBJ;
+
+    /**
      * The reference name for the connection instance.
      * @var string
      */
-    private $instanceName;
+    private $reference;
 
     /**
      * A cache of database instances.
-     * An associative array where the key represents the instance name of the database.
+     * An associative array where the key represents the instance reference of the database.
      * @var Database[]
      */
     private static $instances = [];
@@ -48,12 +56,12 @@ class Database
     /**
      * Database constructor.
      * @param Config $config
-     * @param string $instanceName
+     * @param string $reference The instance reference name.
      */
-    private function __construct(Config $config, string $instanceName = self::DEFAULT)
+    private function __construct(Config $config, string $reference = self::DEFAULT)
     {
         $this->config = $config;
-        $this->instanceName = $instanceName;
+        $this->reference = $reference;
     }
 
     /**
@@ -75,6 +83,25 @@ class Database
         // todo: connection options
         $this->setConnection($pdo);
         return true;
+    }
+
+    /**
+     * Creates a prepared statement and binds parameters onto it.
+     * @param string $sql
+     * @param array $parameters
+     * @return PDOStatement
+     */
+    public function createStatement(string $sql, array $parameters = []): PDOStatement
+    {
+        $statement = $this->getConnection()->prepare($sql);
+        foreach ($parameters as $index => $parameter) {
+            // Assume named parameter if the index is a string
+            $key = is_string($index) ? $index : $index + 1;
+            $type = SqlParam::getPdoType($parameter);
+            $statement->bindValue($key, $parameter, $type);
+        }
+        $statement->setFetchMode($this->fetchMode);
+        return $statement;
     }
 
     /**
@@ -106,36 +133,48 @@ class Database
     }
 
     /**
-     * @param string $instanceName
-     * @return Database
-     * @throws InstanceNotFoundException
+     * Returns the default fetch mode for the Database instance.
+     * @return int
      */
-    public static function getInstance(string $instanceName = self::DEFAULT): Database
+    public function getFetchMode(): int
     {
-        if (!self::hasInstance($instanceName)) {
-            throw new InstanceNotFoundException($instanceName);
-        }
-        return self::$instances[$instanceName];
+        return $this->fetchMode;
     }
 
     /**
-     * Returns the name of the Database instance.
+     * Returns a Database instance identified by its reference.
+     * If the instance reference does not exist an Instance Not Found exception is thrown.
+     *
+     * @param string $reference [optional] The database reference. Omit for the default Database instance.
+     * @return Database
+     * @throws InstanceNotFoundException
+     */
+    public static function getInstance(string $reference = self::DEFAULT): Database
+    {
+        if (!self::hasInstance($reference)) {
+            throw new InstanceNotFoundException($reference);
+        }
+        return self::$instances[$reference];
+    }
+
+    /**
+     * Returns the referential name identifying the Database instance.
      * @return string
      */
-    public function getInstanceName(): string
+    public function getReference(): string
     {
-        return $this->instanceName;
+        return $this->reference;
     }
 
     /**
      * Returns TRUE if a Database instance exists with $instanceName,
      * or FALSE the instance has not been defined/spawned.
-     * @param string $instanceName
+     * @param string $reference [optional] The database instance reference. Omit for the default instance.
      * @return bool
      */
-    public static function hasInstance(string $instanceName = self::DEFAULT): bool
+    public static function hasInstance(string $reference = self::DEFAULT): bool
     {
-        return array_key_exists($instanceName, self::$instances);
+        return array_key_exists($reference, self::$instances);
     }
 
     /**
@@ -155,26 +194,29 @@ class Database
      */
     public function isDefault(): bool
     {
-        return ($this->getInstanceName() === self::DEFAULT);
+        return ($this->getReference() === self::DEFAULT);
     }
 
     /**
      * Create a new named Database instance with associated connection settings.
      * If you are creating your default Database connection instance you can omit
-     * the $instanceName parameter.
+     * the $reference parameter.
+     *
+     * If a duplicate $reference is encountered with an existing Database instance
+     * a Duplicate Instance exception is thrown.
      *
      * @param Config $config
-     * @param string $instanceName [optional] Omit for the default database instance.
+     * @param string $reference [optional] Identifies the database instance. Omit if the default database instance.
      * @return static
      * @throws DuplicateInstanceException
      */
-    public static function newInstance(Config $config, string $instanceName = self::DEFAULT): Database
+    public static function newInstance(Config $config, string $reference = self::DEFAULT): Database
     {
-        if (self::hasInstance($instanceName)) {
-            throw new DuplicateInstanceException($instanceName);
+        if (self::hasInstance($reference)) {
+            throw new DuplicateInstanceException($reference);
         }
-        self::$instances[$instanceName] = new static($config, $instanceName);
-        return self::$instances[$instanceName];
+        self::$instances[$reference] = new static($config, $reference);
+        return self::$instances[$reference];
     }
 
     /**
@@ -185,6 +227,17 @@ class Database
     public function setConnection(?PDO $pdo): Database
     {
         $this->connection = $pdo;
+        return $this;
+    }
+
+    /**
+     * Set the default fetch mode for the database instance.
+     * @param int $fetchMode
+     * @return $this
+     */
+    public function setFetchMode(int $fetchMode): Database
+    {
+        $this->fetchMode = $fetchMode;
         return $this;
     }
 }

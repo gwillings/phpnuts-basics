@@ -31,6 +31,17 @@ class InsertStatement extends AbstractStatement
     }
 
     /**
+     * Executes the Insert Statement and return the number of rows inserted.
+     * @return int
+     */
+    public function execute(): int
+    {
+        $statement = $this->createStatement();
+        $statement->execute();
+        return $statement->rowCount();
+    }
+
+    /**
      * Returns an array containing the names of the blocks in
      * order of priority/sequence.
      * @return string[]
@@ -63,5 +74,15 @@ class InsertStatement extends AbstractStatement
     {
         $this->setBlock(SqlKeyword::INTO, new IntoBlock());
         return $this->addFragment(SqlKeyword::INTO, new SqlFragment($tableName));
+    }
+
+    /**
+     * Returns the ID of the last inserted row or sequence value.
+     * @param string|null $name
+     * @return string
+     */
+    public function lastInsertId(string $name = null): string
+    {
+        return $this->getDatabase()->getConnection()->lastInsertId($name);
     }
 }

@@ -29,7 +29,7 @@ class DatabaseTest extends TestCase
     {
         $database = Database::newInstance(new Config());
         // 1. Verify the instance name represents default
-        $this->assertEquals(Database::DEFAULT, $database->getInstanceName());
+        $this->assertEquals(Database::DEFAULT, $database->getReference());
         // 2. Verify the instance isDefault() returns TRUE
         $this->assertTrue($database->isDefault());
         // 3. Verify that the instance is not automatically connected
@@ -60,8 +60,8 @@ class DatabaseTest extends TestCase
     {
         $database1 = Database::newInstance(new Config());
         $database2 = Database::getInstance();
-        $this->assertEquals(Database::DEFAULT, $database1->getInstanceName());
-        $this->assertEquals($database1->getInstanceName(), $database2->getInstanceName());
+        $this->assertEquals(Database::DEFAULT, $database1->getReference());
+        $this->assertEquals($database1->getReference(), $database2->getReference());
     }
 
     /**
