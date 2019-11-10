@@ -36,7 +36,7 @@ use stdClass;
  *
  * @package PhpNuts\Literal
  */
-class BasicObject implements Iterator, JsonSerializable
+class BasicObject extends AbstractLiteral implements Iterator, JsonSerializable
 {
     /** @var mixed[] An array containing mixed type values.  */
     protected $properties = [];
@@ -73,6 +73,15 @@ class BasicObject implements Iterator, JsonSerializable
             return call_user_func_array([$this, $action], $arguments);
         }
         throw new RuntimeException(__CLASS__ . "::{$name}() method does not exist");
+    }
+
+    /**
+     * Debug information
+     * @return array
+     */
+    public function __debugInfo()
+    {
+        return $this->getProperties();
     }
 
     /**

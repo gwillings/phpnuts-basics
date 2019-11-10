@@ -41,6 +41,7 @@ class DeleteStatement extends AbstractStatement
             SqlKeyword::ORDER_BY    => new OrderByBlock(),
             SqlKeyword::LIMIT       => new LimitBlock()
         ]);
+        $this->andDelete('');
     }
 
     /**

@@ -32,6 +32,14 @@ class SqlBlock
     }
 
     /**
+     * @return string
+     */
+    public function __toString(): string
+    {
+        return $this->toString();
+    }
+
+    /**
      * @param SqlFragment $fragment
      * @return $this
      */
@@ -111,11 +119,29 @@ class SqlBlock
     }
 
     /**
+     * Alias of addFragment
+     * @param SqlFragment $fragment
+     * @return $this
+     */
+    public function push(SqlFragment $fragment): SqlBlock
+    {
+        return $this->addFragment($fragment);
+    }
+
+    /**
      * @return string
      */
     public function toDebugString(): string
     {
         $fragment = new SqlFragment($this->getSql(), $this->getParameters());
         return $fragment->toDebugString();
+    }
+
+    /**
+     * @return string
+     */
+    public function toString(): string
+    {
+        return $this->getSql();
     }
 }

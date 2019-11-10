@@ -7,6 +7,7 @@ use Countable;
 
 /**
  * BasicArray
+ * BasicArray is based on BasicObject and is used as the basis for array-like objects.
  *
  * @package PhpNuts\Literal
  */
@@ -79,6 +80,22 @@ class BasicArray extends BasicObject implements Countable, ArrayAccess
     public function first()
     {
         return ($this->hasProperties()) ? reset($this->properties) : null;
+    }
+
+    /**
+     * Convert a single CSV line into an array of strings.
+     * @param string $csvLine The string to parse.
+     * @param string $delimiter Set the field delimiter (one character only).
+     * @param string $enclosure Set the field enclosure character (one character only).
+     * @param string $escape Set the escape character (at most one character). Defaults as a backslash (\) An empty string ("") disables the proprietary escape mechanism.
+     * @return BasicArray
+     */
+    public static function fromCsv(string $csvLine, string $delimiter = ',', string $enclosure = '"', string $escape = "\\"): BasicArray
+    {
+        if (!strlen($csvLine)) {
+            return new BasicArray();
+        }
+        return new BasicArray(str_getcsv($csvLine, $delimiter, $enclosure, $escape));
     }
 
     /**

@@ -16,6 +16,14 @@ use PhpNuts\Literal\BasicObject;
  * @method string   getPassword()
  * @method string   getType()
  *
+ * @method $this    setHost(string $value)
+ * @method $this    setPort(int $value)
+ * @method $this    setDbname(string $value)
+ * @method $this    setCharset(string $value)
+ * @method $this    setUsername(string $value)
+ * @method $this    setPassword(string $value)
+ * @method $this    setType(string $value)
+ *
  * @package PhpNuts\Database
  */
 class Config extends BasicObject
@@ -36,6 +44,26 @@ class Config extends BasicObject
             'type' => 'mysql'
         ]);
         $this->merge($properties);
+    }
+
+    /**
+     * Returns a string which contains a schema reference name for the config.
+     * The reference should uniquely identify the database, not the config.
+     * This is important so that multiple config settings connecting to the same
+     * schema, but with different credentials, each reference the same schema.
+     *
+     * The components for referencing a schema are:
+     * - host
+     * - port
+     * - dbname
+     *
+     * @return string
+     */
+    public function getSchemaReference(): string
+    {
+        // Note: this is purely for internal use
+        $components = $this->getDbname() . '@' . $this->getHost() . ':' . $this->getPort();
+        return md5($components);
     }
 
     /**
